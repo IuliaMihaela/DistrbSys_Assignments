@@ -61,11 +61,12 @@ class Login(Resource):
 def verify_token(username,token):
     if users[username]["token"] != token:
         return {"success": False}
-    return {"success": True }
+    return {"success": True}
 
 
 api.add_resource(Registration, '/users/registration/api/<string:username>')
 api.add_resource(Login, '/users/login/api')
+
 
 
 
@@ -124,7 +125,7 @@ def validate_update_job(data):
 
 def validate_user_permission_master_data(username, token):
     token_state = verify_token(username, token)
-    if token_state['success'] == True:
+    if token_state['success'] == False:
         return {"error": "Token not valid"}
     if username not in users.keys() or token.split('-')[0] == "secretary":
         return {"error": "Authorization Error"}
@@ -143,14 +144,15 @@ def create_job(data):
 #     return job
 
 def fetch_job(job_id):
-    return jobs[job_id]
+    return {job_id: jobs[job_id]}
 
 def update_job(data):
-    job_data = jobs[data["id"]]
-    id=data['id']
-    del data["id"]
-    jobs[id] = job_data
-    return jobs[id]
+    # job_data = jobs[data["job_id"]]
+    id=data['job_id']
+    del data["job_id"]
+    del data["token"]
+    jobs[id] = data
+    return {id: jobs[id]}
 
 class Jobs(Resource):
     def post(self):
@@ -173,7 +175,7 @@ class Jobs(Resource):
         validation = validate_user_permission_master_data(data["username"],data["token"])
         if validation != "":
             return validation
-        job = fetch_job(data["id"])
+        job = fetch_job(data["job_id"])
         return job
 
     def put(self):
@@ -190,6 +192,13 @@ class Jobs(Resource):
 class Results(Resource):
     pass
 
+def create_results(data):
+    pass
+    # { job_id,
+#       timestamp,
+#       assets
+#
+# }
 
 api.add_resource(Jobs, '/jobs/api')
 api.add_resource(Results, '/results/api')
@@ -199,9 +208,13 @@ api.add_resource(Results, '/results/api')
 # only token as in-memory cash, the rest of user data as persistent storage ?
 # persistent storage: pickle, json, sql lite ?
 # tokens expire ?
-# separate resources ?
-
-
+# separate services ?
+# Registration needed ?
+# Request, responses with source,....
+# timestamp datetime module
+# When to call results table
+# for master data service you need only the token or also the username (checking for permissions) ?
+# readme.md file !!!!
 
 if __name__ == '__main__':
     app.run(debug=True)
