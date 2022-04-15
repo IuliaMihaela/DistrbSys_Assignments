@@ -1,4 +1,4 @@
-from flask import request, jsonify #,Flask
+from flask import request  #,Flask
 from flask_restful import Resource #, Api
 import uuid
 # from flask_sqlalchemy import SQLAlchemy
@@ -59,7 +59,7 @@ class Login(Resource):
         validation = validate_login(request.json)
         if validation != "":
             return validation
-        data=request.json
+        data = request.json
         # return {data["username"]: users[data["username"]]}
         token = emit_token(data)
         users[data["username"]].update({"token": token})
