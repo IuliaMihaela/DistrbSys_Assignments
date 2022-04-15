@@ -256,7 +256,7 @@ class Jobs(Resource):
 
 ########## Results ###########
 
-def validate_post_update_result(data):
+def validate_post_result(data):
     if "username" not in data:
         return {"error": "no user provided"}
     if "token" not in data:
@@ -295,21 +295,43 @@ def validate_post_update_result(data):
 #         return {"error": "assets not provided"}
 #     return ""
 
+def validate_update_result(data):
+    if "username" not in data:
+        return {"error": "no user provided"}
+    if "token" not in data:
+        return {"error": "no token provided"}
+    if "job_id" not in data:
+        return {"error": "job_id not provided"}
+    if "new_job_id" not in data:
+        return {"error": "new_job_id not provided"}
+    if "timestamp" not in data:
+        return {"error": "no timestamp provided"}
+    if "assets" not in data:
+        return {"error": "assets not provided"}
+    return ""
 
 
 def create_result(data):
     new_result = Result(job_id=data['job_id'], timestamp=data['timestamp'], assets=data['assets'])
-
     db.session.add(new_result)  # add job to database
     db.session.commit()  # save changes to database
     return new_result.serialize()
 
+def fetch_result(job_id):
+    try:
+        result = Result.query.get(job_id)
+        return result.serialize()
+    except:
+        return "Result not found"
 
-    # { job_id,
-#       timestamp,
-#       assets
-#
-# }
+def update_result(data):
+    id = data['job_id']
+    result = Result.query.get(id)
+    result.job_id = data['username']
+    result.timestamp = data['timestamp']
+    result.assets = data['assets']
+    db.session.commit()
+    return result.serialize()
 
 
 class Results(Resource):
