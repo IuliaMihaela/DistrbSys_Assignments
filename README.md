@@ -15,7 +15,9 @@ MODULES
 - Flask [Requests, Jsonify]
 - Flask_restful [Resource]
 - uuid
-- Flask_sqlalchemy
+- Flask_sqlalchemy ( We used it as our permanent storage.)
 
 STRUCTURE
-- We have seperated the 2 services [Authentication and master data services] into 2 files. We used Flask_sqlalchemy as our data source.
+- We have seperated the 2 services [Authentication and master data services] into 2 files that are located into the services directory. 
+- In the services directory we also have the __init__ py file that creates the Flask application, loads the configuration and then creates the SQLAlchemy object, passing it to the Flask application.
+- In order to create the initial database and its tables, it is needed to import the db from the services and in the Python shell to run the 'db.create_all()' method.
