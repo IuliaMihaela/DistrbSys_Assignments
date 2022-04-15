@@ -1,9 +1,16 @@
-from flask import Flask, request
-from flask_restful import Resource, Api
+from flask import request, jsonify #,Flask
+from flask_restful import Resource #, Api
 import uuid
+# from flask_sqlalchemy import SQLAlchemy
+from services import app, api, db
+from services.models import Job, Result
 
-app = Flask(__name__)
-api = Api(app)
+# app = Flask(__name__)
+# api = Api(app)
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///master_data.db'
+# db = SQLAlchemy(app)
+
 
 
 # Authentication Service
@@ -82,6 +89,18 @@ api.add_resource(Login, '/users/login/api')
 
 jobs = {}
 
+def create_response(message):
+    return {
+        "source": "http://127.0.0.1:5000",
+        "destination": "",
+        "message_body": message
+    }
+    # return jsonify(
+    #     source="http://127.0.0.1:5000",
+    #     destination="",
+    #     message_body=message
+    # )
+
 def validate_post_job(data):
     if "username" not in data:
         return {"error": "no user provided"}
@@ -133,18 +152,30 @@ def validate_user_permission_master_data(username, token):
 
 
 def create_job(data):
+    # new_job_id = str(uuid.uuid1())
+    # del data["token"]
+    # new_job = {new_job_id:data}
+    # jobs.update(new_job)
+    # return new_job
+
+    ### sql ###
     new_job_id = str(uuid.uuid1())
-    del data["token"]
-    new_job = {new_job_id:data}
-    jobs.update(new_job)
-    return new_job
+    new_job = Job(id=new_job_id, username=data['username'], timestamp=data['timestamp'], status=data['status'], date_range=data['date_range'], assets=data['assets'])
+    db.session.add(new_job)  # add job to database
+    db.session.commit()  # save changes to database
+    return new_job.serialize()
+
+
 
 # def submit_job(job):
 #     jobs.update(job)
 #     return job
 
 def fetch_job(job_id):
-    return {job_id: jobs[job_id]}
+    # return {job_id: jobs[job_id]}
+
+    ### sql ###
+    job = Job.query()
 
 def update_job(data):
     # job_data = jobs[data["job_id"]]
@@ -156,16 +187,17 @@ def update_job(data):
 
 class Jobs(Resource):
     def post(self):
-        validation = validate_post_job(request.json)
+        validation = validate_post_job(request.json)  # check if all data was provided
         if validation != "":
             return validation
         data = request.json
-        validation = validate_user_permission_master_data(data["username"], data["token"])
+        validation = validate_user_permission_master_data(data["username"], data["token"])  # check if the user has permission
         if validation != "":
             return validation
 
         new_job = create_job(request.json)
-        return new_job
+        response = create_response(new_job)
+        return response
 
     def get(self):
         validation = validate_get_job(request.json)
