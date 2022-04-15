@@ -175,7 +175,7 @@ def fetch_job(job_id):
     # return {job_id: jobs[job_id]}
 
     ### sql ###
-    job = Job.query()
+    job = Job.query(job_id)
 
 def update_job(data):
     # job_data = jobs[data["job_id"]]
