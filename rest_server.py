@@ -311,15 +311,72 @@ def fetch_result(job_id):
 def update_result(data):
     id = data['job_id']
     result = Result.query.get(id)
-    result.job_id = data['new_job_id']
     result.timestamp = data['timestamp']
     result.assets = data['assets']
     db.session.commit()
     return result.serialize()
 
+def delete_result(job_id):
+    try:
+        result = Result.query.get(job_id)
+        db.session.delete(result)
+        db.session.commit()
+        return {"success": True}
+    except:
+        return "Result not found"
+
 
 class Results(Resource):
-    pass
+    def post(self):
+        validation = validate_post_update_result(request.json)  # check if all data was provided
+        if validation != "":
+            return validation
+        data = request.json
+        validation = validate_user_permission_master_data(data["username"],
+                                                          data["token"])  # check if the user has permission
+        if validation != "":
+            return validation
+
+        new_result = create_result(request.json)
+        response = create_response(new_result)
+        return response
+
+    def get(self):
+        validation = validate_get_delete_job_result(request.json)
+        if validation != "":
+            return validation
+        data = request.json
+        validation = validate_user_permission_master_data(data["username"], data["token"])
+        if validation != "":
+            return validation
+        result = fetch_result(data["job_id"])
+        response = create_response(result)
+        return response
+
+    def put(self):
+        validation = validate_post_update_result(request.json)
+        if validation != "":
+            return validation
+        data = request.json
+        validation = validate_user_permission_master_data(data["username"], data["token"])
+        if validation != "":
+            return validation
+        updated_result = update_result(request.json)
+        response = create_response(updated_result)
+        return response
+
+    def delete(self):
+        validation = validate_get_delete_job_result(request.json)
+        if validation != "":
+            return validation
+        data = request.json
+        validation = validate_user_permission_master_data(data["username"], data["token"])
+        if validation != "":
+            return validation
+        deleted_result_response = delete_result(data["job_id"])
+        response = create_response(deleted_result_response)
+        return response
+
 
 api.add_resource(Jobs, '/jobs/api')
 api.add_resource(Results, '/results/api')
