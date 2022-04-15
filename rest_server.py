@@ -116,7 +116,7 @@ def validate_post_job(data):
         return {"error": "assets not provided"}
     return ""
 
-def validate_get_delete_job(data):
+def validate_get_delete_job_result(data):
     if "username" not in data:
         return {"error": "no user provided"}
     if "token" not in data:
@@ -219,7 +219,7 @@ class Jobs(Resource):
         return response
 
     def get(self):
-        validation = validate_get_delete_job(request.json)
+        validation = validate_get_delete_job_result(request.json)
         if validation != "":
             return validation
         data = request.json
@@ -243,7 +243,7 @@ class Jobs(Resource):
         return response
 
     def delete(self):
-        validation = validate_get_delete_job(request.json)
+        validation = validate_get_delete_job_result(request.json)
         if validation != "":
             return validation
         data = request.json
@@ -254,17 +254,52 @@ class Jobs(Resource):
         response = create_response(deleted_job_response)
         return response
 
+########## Results ###########
+
+def validate_post_update_result(data):
+    if "username" not in data:
+        return {"error": "no user provided"}
+    if "token" not in data:
+        return {"error": "no token provided"}
+    if "job_id" not in data:
+        return {"error": "job_id not provided"}
+    if "timestamp" not in data:
+        return {"error": "no timestamp provided"}
+    if "assets" not in data:
+        return {"error": "assets not provided"}
+    return ""
+
+# def validate_get_delete_result(data):
+#     if "username" not in data:
+#         return {"error": "no user provided"}
+#     if "token" not in data:
+#         return {"error": "no token provided"}
+#     if "job_id" not in data:
+#         return {"error": "no job_id provided"}
+#     return ""
+#
+# def validate_update_result(data):
+#     if "job_id" not in data:
+#         return {"error": "no job_id provided"}
+#     if "username" not in data:
+#         return {"error": "no user provided"}
+#     if "token" not in data:
+#         return {"error": "no token provided"}
+#     if "timestamp" not in data:
+#         return {"error": "no timestamp provided"}
+#     if "status" not in data:
+#         return {"error": "status not provided"}
+#     if "date_range" not in data:
+#         return {"error": "date_range not provided"}
+#     if "assets" not in data:
+#         return {"error": "assets not provided"}
+#     return ""
+
+
 
 def create_result(data):
-    pass
+    new_result = Result(job_id=data['job_id'], timestamp=data['timestamp'], assets=data['assets'])
 
-
-class Results(Resource):
-    pass
-
-def create_result(data):
-    new_result = Result(job_id=data['job_id'], username=data['username'], timestamp=data['timestamp'],
-                  date_range=data['date_range'], assets=data['assets'])
     db.session.add(new_result)  # add job to database
     db.session.commit()  # save changes to database
     return new_result.serialize()
@@ -275,6 +310,10 @@ def create_result(data):
 #       assets
 #
 # }
+
+
+class Results(Resource):
+    pass
 
 api.add_resource(Jobs, '/jobs/api')
 api.add_resource(Results, '/results/api')
