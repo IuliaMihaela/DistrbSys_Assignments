@@ -17,3 +17,6 @@ MODULES
 - Flask_restful [Resource]
 - uuid
 - Flask_sqlalchemy
+
+STRUCTURE
+- We have seperated the 2 services [Authentication and master data services] into 2 files. We used Flask_sqlalchemy as our dat source.
