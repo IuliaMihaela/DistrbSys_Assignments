@@ -1,6 +1,5 @@
 from services import db
 
-
 class Job(db.Model):
     id = db.Column(db.String, primary_key=True)
     username = db.Column(db.String)
@@ -24,8 +23,7 @@ class Job(db.Model):
 
 
 class Result(db.Model):
-    # id = db.Column(db.String, primary_key=True)
-    job_id = db.Column(db.String, db.ForeignKey('job.id'), primary_key= True )
+    job_id = db.Column(db.String, db.ForeignKey('job.id'), primary_key=True)  # we are having the job id as a primary key for the result
     timestamp = db.Column(db.String)
     assets = db.Column(db.String)  # collection of pair asset number/ a real number between 0.0 and 1.0
 
