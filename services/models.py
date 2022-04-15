@@ -26,6 +26,7 @@ class Job(db.Model):
 class Result(db.Model):
     # id = db.Column(db.String, primary_key=True)
     job_id = db.Column(db.String, db.ForeignKey('job.id'), primary_key= True )
+    timestamp = db.Column(db.String)
     assets = db.Column(db.String)  # collection of pair asset number/ a real number between 0.0 and 1.0
 
     def serialize(self):

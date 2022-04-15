@@ -116,7 +116,7 @@ def validate_post_job(data):
         return {"error": "assets not provided"}
     return ""
 
-def validate_get_job(data):
+def validate_get_delete_job(data):
     if "username" not in data:
         return {"error": "no user provided"}
     if "token" not in data:
@@ -166,24 +166,43 @@ def create_job(data):
     return new_job.serialize()
 
 
-
-# def submit_job(job):
-#     jobs.update(job)
-#     return job
-
 def fetch_job(job_id):
     # return {job_id: jobs[job_id]}
 
     ### sql ###
-    job = Job.query(job_id)
+    try:
+        job = Job.query.get(job_id)
+        return job.serialize()
+    except:
+        return "Job not found"
 
 def update_job(data):
     # job_data = jobs[data["job_id"]]
-    id=data['job_id']
-    del data["job_id"]
-    del data["token"]
-    jobs[id] = data
-    return {id: jobs[id]}
+    # id=data['job_id']
+    # del data["job_id"]
+    # del data["token"]
+    # jobs[id] = data
+    # return{id: jobs[id]}
+
+    ### sql ###
+    id = data['job_id']
+    job = Job.query.get(id)
+    job.username = data['username']
+    job.timestamp = data['timestamp']
+    job.status = data['status']
+    job.date_range = data['date_range']
+    job.assets = data['assets']
+    db.session.commit()
+    return job.serialize()
+
+def delete_job(job_id):
+    try:
+        job = Job.query.get(job_id)
+        db.session.delete(job)
+        db.session.commit()
+        return {"success": True}
+    except:
+        return "Job not found"
 
 class Jobs(Resource):
     def post(self):
@@ -200,7 +219,7 @@ class Jobs(Resource):
         return response
 
     def get(self):
-        validation = validate_get_job(request.json)
+        validation = validate_get_delete_job(request.json)
         if validation != "":
             return validation
         data = request.json
@@ -208,7 +227,8 @@ class Jobs(Resource):
         if validation != "":
             return validation
         job = fetch_job(data["job_id"])
-        return job
+        response = create_response(job)
+        return response
 
     def put(self):
         validation = validate_update_job(request.json)
@@ -219,13 +239,37 @@ class Jobs(Resource):
         if validation != "":
             return validation
         updated_job = update_job(request.json)
-        return updated_job
+        response = create_response(updated_job)
+        return response
+
+    def delete(self):
+        validation = validate_get_delete_job(request.json)
+        if validation != "":
+            return validation
+        data = request.json
+        validation = validate_user_permission_master_data(data["username"], data["token"])
+        if validation != "":
+            return validation
+        deleted_job_response = delete_job(data["job_id"])
+        response = create_response(deleted_job_response)
+        return response
+
+
+def create_result(data):
+    pass
+
 
 class Results(Resource):
     pass
 
-def create_results(data):
-    pass
+def create_result(data):
+    new_result = Result(job_id=data['job_id'], username=data['username'], timestamp=data['timestamp'],
+                  date_range=data['date_range'], assets=data['assets'])
+    db.session.add(new_result)  # add job to database
+    db.session.commit()  # save changes to database
+    return new_result.serialize()
+
+
     # { job_id,
 #       timestamp,
 #       assets
