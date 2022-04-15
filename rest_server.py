@@ -256,7 +256,7 @@ class Jobs(Resource):
 
 ########## Results ###########
 
-def validate_post_result(data):
+def validate_post_update_result(data):
     if "username" not in data:
         return {"error": "no user provided"}
     if "token" not in data:
@@ -278,37 +278,21 @@ def validate_post_result(data):
 #         return {"error": "no job_id provided"}
 #     return ""
 #
+
 # def validate_update_result(data):
-#     if "job_id" not in data:
-#         return {"error": "no job_id provided"}
 #     if "username" not in data:
 #         return {"error": "no user provided"}
 #     if "token" not in data:
 #         return {"error": "no token provided"}
+#     if "job_id" not in data:
+#         return {"error": "job_id not provided"}
+#     if "new_job_id" not in data:
+#         return {"error": "new_job_id not provided"}
 #     if "timestamp" not in data:
 #         return {"error": "no timestamp provided"}
-#     if "status" not in data:
-#         return {"error": "status not provided"}
-#     if "date_range" not in data:
-#         return {"error": "date_range not provided"}
 #     if "assets" not in data:
 #         return {"error": "assets not provided"}
 #     return ""
-
-def validate_update_result(data):
-    if "username" not in data:
-        return {"error": "no user provided"}
-    if "token" not in data:
-        return {"error": "no token provided"}
-    if "job_id" not in data:
-        return {"error": "job_id not provided"}
-    if "new_job_id" not in data:
-        return {"error": "new_job_id not provided"}
-    if "timestamp" not in data:
-        return {"error": "no timestamp provided"}
-    if "assets" not in data:
-        return {"error": "assets not provided"}
-    return ""
 
 
 def create_result(data):
@@ -327,7 +311,7 @@ def fetch_result(job_id):
 def update_result(data):
     id = data['job_id']
     result = Result.query.get(id)
-    result.job_id = data['username']
+    result.job_id = data['new_job_id']
     result.timestamp = data['timestamp']
     result.assets = data['assets']
     db.session.commit()
