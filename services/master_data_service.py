@@ -206,7 +206,7 @@ def delete_result(job_id):
         # get result by the job id
         result = Result.query.get(job_id)
         db.session.delete(result)  # delete the result
-        db.session.commit()  # save cahnges
+        db.session.commit()  # save changes
         return {"success": True}
     except:
         return "Result not found"

@@ -1,6 +1,7 @@
 from requests import put, get, post, delete
 import datetime
 import json
+from services.authentication_service import users
 
 
 # Authentication Service
@@ -14,6 +15,7 @@ print(r.json())
 login_data = r.json()
 token = login_data["felicity"]["token"]
 
+print("users:",users)
 # Master Data Service
 # Jobs
 
@@ -43,7 +45,7 @@ print(job_response)
 print("post")
 r = post('http://localhost:5000/results/api', json={'username': 'felicity', 'token': token, "job_id": job_id, "timestamp": "15-04-2022 19:56", "assets": "1,22,3,4,5,11"})
 result_response = json.loads(r.content.decode())
-result_id = job_response["message_body"]["job_id"]
+result_id = result_response["message_body"]["job_id"]
 
 print("get")
 r = get('http://localhost:5000/results/api', json={'username': 'felicity', 'token': token, "job_id": job_id})
