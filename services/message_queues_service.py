@@ -1,4 +1,3 @@
-
 import queue
 from flask import request
 from flask_restful import Resource
@@ -45,29 +44,50 @@ def validate_push_job(data):
         return {"error": "no job_id provided"}
     return ""
 
+class handling_job_queues(Resource):
+    def __init__(self, list_of_queues):
+        self.list_of_queues = []
 
+    def create(self, queue):
 
-
-
-class Jobs_Queue(Resource):
-
-    def create(self,queue):
-        list_of_queues = []
         data = request.json
         validation = validate_user_permission_delete_create(data["username"],
-                                                               data["token"])  # check if the user has permission
+                                                            data["token"])  # check if the user has permission
         if validation != "":
             return validation
 
         # check if queue already exists
 
-        if queue in list_of_queues:
+        if queue in self.list_of_queues:
             return {"error": "queue " + queue + " already exists"}
         else:
-            list_of_queues.append(queue)
+            queue = queue.Queue()
+            self.list_of_queues.append(queue)
 
-        return list_of_queues
 
+
+    def delete(self,queue):
+        data = request.json
+        validation = validate_user_permission_delete_create(data["username"],
+                                                            data["token"])  # check if the user has permission
+        if validation != "":
+            return validation
+
+        # deleting messages in queue
+        with queue_jobs.mutex:
+            queue_jobs.queue.clear()
+
+        # deleting queue from list
+        self.list_of_queues.remove(queue)
+
+    def Listing(self):
+        data = request.json
+        
+        # listing queue
+        return self.list_of_queues
+
+
+class Jobs_Queue(Resource):
 
     def push(self):
         validation = validate_push_job(request.json)  # check if all data was provided
@@ -98,36 +118,6 @@ class Jobs_Queue(Resource):
 
         # have to send contents to caller
 
-    def Listing(self):
-        data = request.json
-        validation = validate_user_permission_append_pull_push(data["username"],
-                                                               data["token"])  # check if the user has permission
-        if validation != "":
-            return validation
-
-        # check if queue is not empty
-        if queue_jobs.empty() == True:
-            return {"error": "job queue is empty"}
-
-        # listing queue
-        return queue_jobs.queue
-
-    def delete(self):
-        data = request.json
-        validation = validate_user_permission_delete_create(data["username"],
-                                                               data["token"])  # check if the user has permission
-        if validation != "":
-            return validation
-
-        # check if queue is not empty
-        if queue_jobs.empty() == True:
-            return {"error": "job queue is already empty"}
-
-        # deleting queue
-        with queue_jobs.mutex:
-            queue_jobs.queue.clear()
-
-
 
 
 
@@ -135,21 +125,6 @@ class Jobs_Queue(Resource):
 class Results_Queue(Resource):
     def post(self):
         pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
